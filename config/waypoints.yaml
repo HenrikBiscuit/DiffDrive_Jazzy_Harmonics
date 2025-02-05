@@ -1,0 +1,13 @@
+waypoints:
+  - latitude: 55.393899  # Starting position from my_world.sdf
+    longitude: 10.352372
+    yaw: 0.0
+  - latitude: 55.393920  # Move ~20m north
+    longitude: 10.352372
+    yaw: 0.0
+  - latitude: 55.393920  # Move ~20m east
+    longitude: 10.352450
+    yaw: 1.57
+  - latitude: 55.393899  # Return to start position
+    longitude: 10.352372
+    yaw: 3.14
