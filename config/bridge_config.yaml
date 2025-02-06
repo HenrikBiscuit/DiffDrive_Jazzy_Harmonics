@@ -32,8 +32,9 @@
   gz_type_name: "gz.msgs.Twist"
   direction: ROS_TO_GZ
 
-- ros_topic_name: "/gps"
-  gz_topic_name: "/gps"
+- ros_topic_name: "/gps/fix/raw"
+  gz_topic_name: "/heibjerg_bot/navsat_link/navsat"
   ros_type_name: "sensor_msgs/msg/NavSatFix"
   gz_type_name: "gz.msgs.NavSat"
   direction: GZ_TO_ROS
+  
