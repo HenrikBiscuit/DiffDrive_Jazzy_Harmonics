@@ -92,7 +92,7 @@ def generate_launch_description():
         parameters=[rl_params, {'use_sim_time': LaunchConfiguration('use_sim_time')}],
         remappings=[
             ('imu/data', 'imu'),
-            ('gps/fix', 'gps/fix/raw'),  # Changed to match bridge output
+            ('gps/fix', '/navsat'),
             ('gps/filtered', 'gps/filtered'),
             ('odometry/gps', 'odometry/gps'),
             ('odometry/filtered', 'odometry/global')
@@ -120,5 +120,5 @@ def generate_launch_description():
         robot_localization_odom,
         robot_localization_map,
         Navsat_transform,
-        navigation2_cmd
+        #navigation2_cmd
     ])

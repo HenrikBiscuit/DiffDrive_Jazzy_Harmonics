@@ -290,10 +290,10 @@
           </geometry>
         </collision>
         <xacro:box_inertia m="0.1" w="0.1" d="0.1" h="0.1"/>
-        <sensor name="navsat" type="navsat">
+        <sensor name="navsat_sensor" type="navsat">
           <always_on>1</always_on>
           <update_rate>1</update_rate>
-          <topic>/gps/fix</topic>
+          <topic>/navsat</topic>
           <navsat>
             <position_sensing>
               <horizontal>
