@@ -294,6 +294,7 @@
           <always_on>1</always_on>
           <update_rate>1</update_rate>
           <topic>/navsat</topic>
+          <gz_frame_id>navsat_link</gz_frame_id> 
           <navsat>
             <position_sensing>
               <horizontal>

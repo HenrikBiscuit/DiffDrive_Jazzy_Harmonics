@@ -89,7 +89,19 @@ def generate_launch_description():
         executable='navsat_transform_node',
         name='navsat_transform',
         output='screen',
-        parameters=[rl_params, {'use_sim_time': LaunchConfiguration('use_sim_time')}],
+        parameters=[rl_params, 
+                    {'use_sim_time': LaunchConfiguration('use_sim_time')}, 
+                    {'magnetic_declination_radians': 0.0,
+                    'yaw_offset': 0.0,
+                    'zero_altitude': True,
+                    'broadcast_cartesian_transform': True,
+                    'publish_filtered_gps': True,
+                    'use_odometry_yaw': True,
+                    'wait_for_datum': True,
+                    'datum': [55.393899, 10.352372, 0.0],
+                    'gps_frame': 'heibjerg_bot/navsat_link/navsat_sensor',
+                    'base_link_frame': 'base_link',
+                    'debug': True}],
         remappings=[
             ('imu/data', 'imu'),
             ('gps/fix', '/navsat'),
@@ -119,6 +131,6 @@ def generate_launch_description():
         robot_state_publisher_node,
         robot_localization_odom,
         robot_localization_map,
-        Navsat_transform,
+        Navsat_transform
         #navigation2_cmd
     ])

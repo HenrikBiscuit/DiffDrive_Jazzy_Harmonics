@@ -2,8 +2,6 @@
 import rclpy
 from nav2_simple_commander.robot_navigator import BasicNavigator
 import yaml
-from ament_index_python.packages import get_package_share_directory
-import os
 import sys
 import time
 import math
@@ -28,28 +26,6 @@ def quaternion_from_euler(roll, pitch, yaw):
     q.z = sy * cp * cr - cy * sp * sr
     return q
 
-
-def euler_from_quaternion(q: Quaternion):
-    """
-    Convert a quaternion into euler angles
-    taken from: https://automaticaddison.com/how-to-convert-a-quaternion-into-euler-angles-in-python/
-    """
-    t0 = +2.0 * (q.w * q.x + q.y * q.z)
-    t1 = +1.0 - 2.0 * (q.x * q.x + q.y * q.y)
-    roll_x = math.atan2(t0, t1)
-
-    t2 = +2.0 * (q.w * q.y - q.z * q.x)
-    t2 = +1.0 if t2 > +1.0 else t2
-    t2 = -1.0 if t2 < -1.0 else t2
-    pitch_y = math.asin(t2)
-
-    t3 = +2.0 * (q.w * q.z + q.x * q.y)
-    t4 = +1.0 - 2.0 * (q.y * q.y + q.z * q.z)
-    yaw_z = math.atan2(t3, t4)
-
-    return roll_x, pitch_y, yaw_z
-
-
 def latLonYaw2Geopose(latitude: float, longitude: float, yaw: float = 0.0) -> GeoPose:
     """
     Creates a geographic_msgs/msg/GeoPose object from latitude, longitude and yaw
@@ -64,7 +40,6 @@ class YamlWaypointParser:
     """
     Parse a set of gps waypoints from a yaml file
     """
-
     def __init__(self, wps_file_path: str) -> None:
         with open(wps_file_path, 'r') as wps_file:
             self.wps_dict = yaml.safe_load(wps_file)
@@ -79,40 +54,149 @@ class YamlWaypointParser:
             gepose_wps.append(latLonYaw2Geopose(latitude, longitude, yaw))
         return gepose_wps
 
-
-class GpsWpCommander():
+class GpsWpCommander:
     """
     Class to use nav2 gps waypoint follower to follow a set of waypoints logged in a yaml file
     """
-
     def __init__(self, wps_file_path):
-        self.navigator = BasicNavigator("basic_navigator")
+        rclpy.init()
+        self.node = rclpy.create_node('gps_waypoint_follower')
+        self.navigator = BasicNavigator()
         self.wp_parser = YamlWaypointParser(wps_file_path)
+        # Create lifecycle state client
+        from lifecycle_msgs.srv import GetState
+        self.get_state_client = self.node.create_client(GetState, '/bt_navigator/get_state')
+
+    def wait_for_topics(self):
+        """
+        Wait for required topics to become available
+        """
+        required_topics = [
+            '/odom',
+            '/cmd_vel',
+            '/odometry/global',
+            '/odometry/local',
+            '/navsat'
+        ]
+        
+        print('Waiting for required topics...')
+        while rclpy.ok():
+            available_topics = [t[0] for t in self.node.get_topic_names_and_types()]
+            missing_topics = [topic for topic in required_topics if topic not in available_topics]
+            if not missing_topics:
+                break
+            print(f'Waiting for topics: {", ".join(missing_topics)}')
+            time.sleep(1)
+            
+        print('All required topics are available')
+
+    def wait_for_navigation_ready(self):
+        """
+        Wait for the navigation stack to be ready
+        """
+        self.wait_for_topics()
+        
+        # Wait for Nav2 lifecycle nodes to be active
+        print('Waiting for Nav2...')
+        
+        # Check for specific Nav2 services that indicate readiness
+        required_services = [
+            '/bt_navigator/get_state',
+            '/controller_server/get_state',
+            '/planner_server/get_state',
+            '/behavior_server/get_state'
+        ]
+        
+        while rclpy.ok():
+            available_services = [srv[0] for srv in self.node.get_service_names_and_types()]
+            missing_services = [srv for srv in required_services if srv not in available_services]
+            
+            if not missing_services:
+                print("All Nav2 services are available")
+                break
+                
+            print(f'Waiting for Nav2 services: {", ".join(missing_services)}')
+            time.sleep(1)
+        
+        # Check current states of all Nav2 nodes
+        print("\nChecking Nav2 node states:")
+        self.check_lifecycle_states()
+        
+        # Now wait for the lifecycle nodes to be active
+        print("\nWaiting for Nav2 nodes to be active...")
+        from lifecycle_msgs.srv import GetState
+        req = GetState.Request()
+        
+        try:
+            # Wait for bt_navigator to be active
+            while rclpy.ok():
+                future = self.get_state_client.call_async(req)
+                rclpy.spin_until_future_complete(self.node, future, timeout_sec=1.0)
+                if future.result() is not None:
+                    state = future.result().current_state.label
+                    if state == 'active':
+                        break
+                    print(f"bt_navigator state is: {state}")
+                print("Waiting for bt_navigator to be active...")
+                time.sleep(1)
+            
+            print("Navigation system is ready!")
+            
+        except Exception as e:
+            print(f"Warning during Nav2 activation check: {e}")
+            print("Continuing anyway as services are available...")
 
     def start_wpf(self):
         """
         Function to start the waypoint following
         """
-        self.navigator.waitUntilNav2Active(localizer='robot_localization') #Går i stå her
-        wps = self.wp_parser.get_wps()
-        self.navigator.followGpsWaypoints(wps)
-        while (not self.navigator.isTaskComplete()):
-            time.sleep(0.1)
-        print("wps completed successfully")
-
+        try:
+            self.wait_for_navigation_ready()
+            wps = self.wp_parser.get_wps()
+            
+            print(f"Following {len(wps)} waypoints...")
+            print("Waypoint details:")
+            for i, wp in enumerate(wps):
+                print(f"  Waypoint {i+1}:")
+                print(f"    Latitude: {wp.position.latitude}")
+                print(f"    Longitude: {wp.position.longitude}")
+            
+            self.navigator.followGpsWaypoints(wps)
+            
+            while not self.navigator.isTaskComplete():
+                feedback = self.navigator.getFeedback()
+                if feedback:
+                    print(f'Executing current waypoint: {feedback.current_waypoint + 1}/{len(wps)}')
+                time.sleep(1)
+                
+            print("Waypoints completed successfully!")
+        except Exception as e:
+            print(f"Error during waypoint following: {str(e)}")
+            raise
+        finally:
+            self.node.destroy_node()
 
 def main():
-    rclpy.init()
-    
     if len(sys.argv) > 1:
         yaml_file_path = sys.argv[1]
     else:
         print("Error: Please provide the path to the waypoints yaml file")
         sys.exit(1)
-        
-    gps_wpf = GpsWpCommander(yaml_file_path)
-    gps_wpf.start_wpf()
-
+    
+    try:
+        gps_wpf = GpsWpCommander(yaml_file_path)
+        gps_wpf.start_wpf()
+    except KeyboardInterrupt:
+        print("\nNavigation cancelled by user")
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        import traceback
+        traceback.print_exc()
+    finally:
+        try:
+            rclpy.shutdown()
+        except Exception:
+            pass
 
 if __name__ == "__main__":
     main()
