@@ -73,7 +73,7 @@ def generate_launch_description():
         gz_server,
         ros_gz_bridge,
         spawn_entity,
-        #rviz_node,
+        rviz_node,
         robot_state_publisher_node,
         robot_localization_node
     ])

@@ -11,14 +11,10 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
-install(PROGRAMS
-  scripts/waypoint_follower.py
-  scripts/interactive_waypoint_follower.py
-  DESTINATION lib/${PROJECT_NAME}
-)
+
 
 install(
-  DIRECTORY src launch rviz config world scripts
+  DIRECTORY src launch rviz config world 
   DESTINATION share/${PROJECT_NAME}
 )
 

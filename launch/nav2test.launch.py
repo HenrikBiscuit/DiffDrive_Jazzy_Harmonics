@@ -15,7 +15,6 @@ import os
 
 def generate_launch_description():
     pkg_share = FindPackageShare(package='heibjerg').find('heibjerg')
-    bringup_dir = get_package_share_directory('nav2_bringup')
 
     rl_params = os.path.join(pkg_share, 'config/robot_localization.yaml')
     default_model_path = os.path.join(pkg_share, 'src', 'description', 'heibjerg_robot.sdf')
@@ -99,14 +98,24 @@ def generate_launch_description():
         ]
     )
 
+
     navigation2_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(bringup_dir, 'launch', 'navigation_launch.py')),
+            [PathJoinSubstitution([FindPackageShare('nav2_bringup'),
+                                   'launch',
+                                   'navigation_launch.py'])]),
         launch_arguments={
             'use_sim_time': LaunchConfiguration('use_sim_time'),
             'params_file': configured_params,
             'autostart': 'True',
         }.items()
+    )
+
+    rviz_node = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [PathJoinSubstitution([FindPackageShare('nav2_bringup'),
+                                   'launch',
+                                   'rviz_launch.py'])]),
     )
 
     return LaunchDescription([
@@ -119,6 +128,7 @@ def generate_launch_description():
         robot_state_publisher_node,
         robot_localization_odom,
         robot_localization_map,
-        Navsat_transform
-        #navigation2_cmd
+        Navsat_transform,
+        navigation2_cmd,
+        rviz_node
     ])

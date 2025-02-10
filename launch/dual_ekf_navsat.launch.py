@@ -1,6 +1,5 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription, TimerAction
-from launch.conditions import IfCondition, UnlessCondition
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
@@ -8,14 +7,23 @@ from launch_ros.substitutions import FindPackageShare
 from ros_gz_sim.actions import GzServer
 from ros_gz_bridge.actions import RosGzBridge
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from nav2_common.launch import RewrittenYaml
+
+from ament_index_python.packages import get_package_share_directory
+
 import os
 
 def generate_launch_description():
     pkg_share = FindPackageShare(package='heibjerg').find('heibjerg')
+    bringup_dir = get_package_share_directory('nav2_bringup')
+
     rl_params = os.path.join(pkg_share, 'config/robot_localization.yaml')
     default_model_path = os.path.join(pkg_share, 'src', 'description', 'heibjerg_robot.sdf')
     bridge_config_path = os.path.join(pkg_share, 'config', 'bridge_config.yaml')
     world_path = os.path.join(pkg_share, 'world', 'my_world.sdf')
+    nav2_params_path = os.path.join(pkg_share, 'config', 'nav2_no_map_params.yaml')
+
+    configured_params = RewrittenYaml(source_file=nav2_params_path, root_key="", param_rewrites="", convert_types=True)
 
     robot_state_publisher_node = Node(
         package='robot_state_publisher',
@@ -30,6 +38,7 @@ def generate_launch_description():
     create_own_container='True',
     use_composition='True',
     )
+
     ros_gz_bridge = RosGzBridge(
         bridge_name='ros_gz_bridge',
         config_file=bridge_config_path,
@@ -37,6 +46,7 @@ def generate_launch_description():
         create_own_container='False',
         use_composition='True',
     )
+
     spawn_entity = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             [PathJoinSubstitution([FindPackageShare('ros_gz_sim'),
@@ -75,20 +85,18 @@ def generate_launch_description():
     )
 
     Navsat_transform = Node(
-            package='robot_localization',
-            executable='navsat_transform_node',
-            name='navsat_transform',
-            output='screen',
-            parameters=[rl_params, 
-                    {'use_sim_time': LaunchConfiguration('use_sim_time')},
-                    {'print_diagnostics': True}],
-            remappings=[
-                ("imu/data", "/imu"),
-                ("gps/fix", "/gps/fix"),
-                ("gps/filtered", "gps/filtered"),
-                ("odometry/gps", "odometry/gps"),
-                ("odometry/filtered", "/odometry/global")
-            ]
+        package='robot_localization',
+        executable='navsat_transform_node',
+        name='navsat_transform',
+        output='screen',
+        parameters=[rl_params, {'use_sim_time': LaunchConfiguration('use_sim_time')}],
+        remappings=[
+            ('imu/data', 'imu'),
+            ('gps/fix', '/navsat'),
+            ('gps/filtered', 'gps/filtered'),
+            ('odometry/gps', 'odometry/gps'),
+            ('odometry/filtered', 'odometry/global')
+        ]
     )
 
     return LaunchDescription([
@@ -101,5 +109,5 @@ def generate_launch_description():
         robot_state_publisher_node,
         robot_localization_odom,
         robot_localization_map,
-        TimerAction(period=5.0, actions=[Navsat_transform])
+        Navsat_transform
     ])
