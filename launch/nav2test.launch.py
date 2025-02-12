@@ -1,5 +1,5 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription, TimerAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
@@ -99,23 +99,33 @@ def generate_launch_description():
     )
 
 
-    navigation2_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            [PathJoinSubstitution([FindPackageShare('nav2_bringup'),
-                                   'launch',
-                                   'navigation_launch.py'])]),
-        launch_arguments={
-            'use_sim_time': LaunchConfiguration('use_sim_time'),
-            'params_file': configured_params,
-            'autostart': 'True',
-        }.items()
+    delayed_navigation = TimerAction(
+        period=8.0,  
+        actions=[
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    [PathJoinSubstitution([pkg_share,
+                                       'launch',
+                                       'navigation_launch.py'])]),
+                launch_arguments={
+                    'use_sim_time': LaunchConfiguration('use_sim_time'),
+                    'params_file': configured_params,
+                    'autostart': 'True',
+                }.items()
+            )
+        ]
     )
 
-    rviz_node = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            [PathJoinSubstitution([FindPackageShare('nav2_bringup'),
-                                   'launch',
-                                   'rviz_launch.py'])]),
+    delayed_rviz = TimerAction(
+        period=8.0,  
+        actions=[
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    [PathJoinSubstitution([FindPackageShare('nav2_bringup'),
+                                       'launch',
+                                       'rviz_launch.py'])]),
+            )
+        ]
     )
 
     return LaunchDescription([
@@ -129,6 +139,6 @@ def generate_launch_description():
         robot_localization_odom,
         robot_localization_map,
         Navsat_transform,
-        navigation2_cmd,
-        rviz_node
+        delayed_navigation,
+        delayed_rviz
     ])

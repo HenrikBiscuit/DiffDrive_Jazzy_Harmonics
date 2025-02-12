@@ -106,12 +106,12 @@ local_costmap:
       height: 5
       resolution: 0.05
       robot_radius: 0.22
-      plugins: [""]
-      # plugins: ["inflation_layer"]
-      # inflation_layer:
-      #   plugin: "nav2_costmap_2d::InflationLayer"
-      #   cost_scaling_factor: 3.0
-      #   inflation_radius: 0.55
+      #plugins: [""]
+      plugins: ["inflation_layer"]
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        inflation_radius: 0.55
       always_send_full_costmap: True
 
 # GPS WPF CHANGE: Remove static layer
