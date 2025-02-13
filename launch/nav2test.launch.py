@@ -21,8 +21,9 @@ def generate_launch_description():
     bridge_config_path = os.path.join(pkg_share, 'config', 'bridge_config.yaml')
     world_path = os.path.join(pkg_share, 'world', 'my_world.sdf')
     nav2_params_path = os.path.join(pkg_share, 'config', 'nav2_no_map_params.yaml')
-
     configured_params = RewrittenYaml(source_file=nav2_params_path, root_key="", param_rewrites="", convert_types=True)
+    map_yaml_file = LaunchConfiguration('map')
+
 
     robot_state_publisher_node = Node(
         package='robot_state_publisher',
@@ -100,15 +101,15 @@ def generate_launch_description():
 
 
     delayed_navigation = TimerAction(
-        period=8.0,  
+        period=7.0,  
         actions=[
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(
+            IncludeLaunchDescription(PythonLaunchDescriptionSource(
                     [PathJoinSubstitution([pkg_share,
                                        'launch',
-                                       'navigation_launch.py'])]),
+                                       'bringup_launch.py'])]),
                 launch_arguments={
                     'use_sim_time': LaunchConfiguration('use_sim_time'),
+                    'map': map_yaml_file,
                     'params_file': configured_params,
                     'autostart': 'True',
                 }.items()
@@ -117,7 +118,7 @@ def generate_launch_description():
     )
 
     delayed_rviz = TimerAction(
-        period=8.0,  
+        period=10.0,  
         actions=[
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
@@ -131,6 +132,8 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument(name='model', default_value=default_model_path, description='Absolute path to robot model file'),
         DeclareLaunchArgument(name='use_sim_time', default_value='True', description='Flag to enable use_sim_time'),
+        DeclareLaunchArgument(name='map', default_value='/home/henrik/HeibjergV2/maps/map.yaml',
+                     description='Full path to map yaml file to load'),
         ExecuteProcess(cmd=['gz', 'sim', '-g'], output='screen'),
         gz_server,
         ros_gz_bridge,
