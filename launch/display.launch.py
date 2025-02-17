@@ -16,6 +16,7 @@ def generate_launch_description():
     default_rviz_config_path = os.path.join(pkg_share, 'rviz', 'config.rviz')
     bridge_config_path = os.path.join(pkg_share, 'config', 'bridge_config.yaml')
     world_path = os.path.join(pkg_share, 'world', 'my_world.sdf')
+    os.environ['GZ_SIM_RESOURCE_PATH'] = os.path.join(pkg_share, 'world')
 
     robot_state_publisher_node = Node(
         package='robot_state_publisher',

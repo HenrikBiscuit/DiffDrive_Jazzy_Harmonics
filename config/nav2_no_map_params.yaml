@@ -24,7 +24,7 @@ bt_navigator:
 
 controller_server:
   ros__parameters:
-    controller_frequency: 5.0
+    controller_frequency: 20.0
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.001
     min_theta_velocity_threshold: 0.001
@@ -155,12 +155,12 @@ global_costmap:
 #     use_sim_time: True
 
 
-map_saver:
-  ros__parameters:
-    save_map_timeout: 5.0
-    free_thresh_default: 0.25
-    occupied_thresh_default: 0.65
-    map_subscribe_transient_local: True
+# map_saver:
+#   ros__parameters:
+#     save_map_timeout: 5.0
+#     free_thresh_default: 0.25
+#     occupied_thresh_default: 0.65
+#     map_subscribe_transient_local: True
 
 planner_server:
   ros__parameters:
@@ -226,7 +226,7 @@ velocity_smoother:
     min_velocity: [-0.26, 0.0, -1.0]
     max_accel: [2.5, 0.0, 3.2]
     max_decel: [-2.5, 0.0, -3.2]
-    odom_topic: "odom"
+    odom_topic: "/odometry/filtered"
     odom_duration: 0.1
     deadband_velocity: [0.0, 0.0, 0.0]
     velocity_timeout: 1.0

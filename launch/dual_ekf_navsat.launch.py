@@ -22,6 +22,7 @@ def generate_launch_description():
     bridge_config_path = os.path.join(pkg_share, 'config', 'bridge_config.yaml')
     world_path = os.path.join(pkg_share, 'world', 'my_world.sdf')
     nav2_params_path = os.path.join(pkg_share, 'config', 'nav2_no_map_params.yaml')
+    os.environ['GZ_SIM_RESOURCE_PATH'] = os.path.join(pkg_share, 'world')
 
     configured_params = RewrittenYaml(source_file=nav2_params_path, root_key="", param_rewrites="", convert_types=True)
 
