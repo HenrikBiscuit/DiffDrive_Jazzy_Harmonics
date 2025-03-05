@@ -93,7 +93,7 @@ def generate_launch_description():
         parameters=[rl_params, {'use_sim_time': LaunchConfiguration('use_sim_time')}],
         remappings=[
             ('imu/data', 'imu'),
-            ('gps/fix', '/navsat'),
+            ('gps/fix', '/navsat_degraded'),
             ('gps/filtered', 'gps/filtered'),
             ('odometry/gps', 'odometry/gps'),
             ('odometry/filtered', 'odometry/global')

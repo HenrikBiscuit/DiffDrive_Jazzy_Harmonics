@@ -102,7 +102,7 @@ def generate_launch_description():
 
 
     delayed_navigation = TimerAction(
-        period=7.0,  
+        period=13.0,  
         actions=[
             IncludeLaunchDescription(PythonLaunchDescriptionSource(
                     [PathJoinSubstitution([pkg_share,
@@ -119,7 +119,7 @@ def generate_launch_description():
     )
 
     delayed_rviz = TimerAction(
-        period=10.0,  
+        period=17.0,  
         actions=[
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(

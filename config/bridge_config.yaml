@@ -37,14 +37,30 @@
   gz_type_name: "gz.msgs.NavSat"
   direction: GZ_TO_ROS
   
-- ros_topic_name: /camera/image_raw
-  gz_topic_name: /camera
+# Left camera image
+- ros_topic_name: /camera_left/image_raw
+  gz_topic_name: /camera_left
   ros_type_name: "sensor_msgs/msg/Image"
   gz_type_name: "gz.msgs.Image"
   direction: GZ_TO_ROS
 
-- ros_topic_name: /camera/camera_info
-  gz_topic_name: /camera/camera_info
+# Left camera info
+- ros_topic_name: /camera_left/camera_info
+  gz_topic_name: /camera_left/camera_info
+  ros_type_name: "sensor_msgs/msg/CameraInfo"
+  gz_type_name: "gz.msgs.CameraInfo"
+  direction: GZ_TO_ROS
+  
+# Right camera image
+- ros_topic_name: /camera_right/image_raw
+  gz_topic_name: /camera_right
+  ros_type_name: "sensor_msgs/msg/Image"
+  gz_type_name: "gz.msgs.Image"
+  direction: GZ_TO_ROS
+
+# Right camera info
+- ros_topic_name: /camera_right/camera_info
+  gz_topic_name: /camera_right/camera_info
   ros_type_name: "sensor_msgs/msg/CameraInfo"
   gz_type_name: "gz.msgs.CameraInfo"
   direction: GZ_TO_ROS

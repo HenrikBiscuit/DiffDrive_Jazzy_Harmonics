@@ -14,6 +14,11 @@
     <xacro:property name="wheel_xoff" value="0.12"/>
 
     <xacro:property name="caster_xoff" value="0.14"/>
+    
+    <!-- Camera constants for stereo setup -->
+    <xacro:property name="camera_baseline" value="0.12"/>
+    <xacro:property name="camera_height" value="0.05"/>
+    <xacro:property name="camera_x_offset" value="0.215"/>
 
     <!-- Define some commonly used inertial properties  -->
     <xacro:macro name="box_inertia" params="m w h d">
@@ -59,6 +64,59 @@
           <izz>${(2/5) * m * (r*r)}</izz>
         </inertia>
       </inertial>
+    </xacro:macro>
+
+    <!-- Camera macro for reuse -->
+    <xacro:macro name="camera_link_sensor" params="prefix x y z">
+      <link name='${prefix}_link'>
+        <pose relative_to="${prefix}_joint"/>
+        <visual name="${prefix}_link_visual">
+          <geometry>
+            <box><size>
+              0.015 0.015 0.0222
+            </size></box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.2 0.2 1</ambient>
+            <diffuse>0.2 0.2 0.2 1</diffuse>
+          </material>
+        </visual>
+
+        <collision name="${prefix}_link_collision">
+          <geometry>
+            <box><size>
+              0.015 0.015 0.0222
+            </size></box>
+          </geometry>
+        </collision>
+
+        <xacro:box_inertia m="0.035" w="0.015" d="0.015" h="0.0222"/>
+
+        <sensor name="${prefix}" type="camera">
+          <always_on>true</always_on>
+          <visualize>true</visualize>
+          <update_rate>30.0</update_rate>
+          <topic>${prefix}</topic>
+          <gz_frame_id>${prefix}_link</gz_frame_id>
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image>
+              <width>640</width>
+              <height>480</height>
+            </image>
+            <clip>
+              <near>0.1</near>
+              <far>100</far>
+            </clip>
+          </camera>
+        </sensor>
+      </link>
+
+      <joint name="${prefix}_joint" type="fixed">
+        <parent>base_link</parent>
+        <child>${prefix}_link</child>
+        <pose relative_to="base_link">${x} ${y} ${z} 0 0 0</pose>
+      </joint>
     </xacro:macro>
 
     <!-- Robot Base -->
@@ -319,6 +377,13 @@
         <child>navsat_link</child>
         <pose relative_to="base_link">0 0 0.1 0 0 0</pose>
     </joint>
+    
+    <!-- Left Camera -->
+    <xacro:camera_link_sensor prefix="camera_left" x="${camera_x_offset}" y="${camera_baseline/2}" z="${camera_height}"/>
+    
+    <!-- Right Camera -->
+    <xacro:camera_link_sensor prefix="camera_right" x="${camera_x_offset}" y="${-camera_baseline/2}" z="${camera_height}"/>
+    
     <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
       <!-- wheels -->
       <left_joint>drivewhl_l_joint</left_joint>
@@ -344,52 +409,6 @@
       <frame_id>odom</frame_id>
       <child_frame_id>base_link</child_frame_id>
     </plugin>
-
-    <joint name="camera_joint" type="fixed">
-  <parent>base_link</parent>
-  <child>camera_link</child>
-  <pose relative_to="base_link">0.215 0 0.05 0 0 0</pose>
-</joint>
-
-  <link name='camera_link'>
-    <pose relative_to="camera_joint"/>
-    <visual name="camera_link_visual">
-      <geometry>
-        <box><size>
-          0.015 0.015 0.0222
-        </size></box>
-      </geometry>
-    </visual>
-
-    <collision name="camera_link_collision">
-      <geometry>
-        <box><size>
-          0.015 0.015 0.0222
-        </size></box>
-      </geometry>
-    </collision>
-
-    <xacro:box_inertia m="0.035" w="0.015" d="0.015" h="0.0222"/>
-
-    <sensor name="camera" type="camera">
-      <always_on>true</always_on>
-      <visualize>true</visualize>
-      <update_rate>10.0</update_rate>
-      <topic>camera</topic>
-      <gz_frame_id>camera_link</gz_frame_id>
-      <camera>
-        <horizontal_fov>1.047</horizontal_fov>
-        <image>
-          <width>640</width>
-          <height>480</height>
-        </image>
-        <clip>
-          <near>0.1</near>
-          <far>100</far>
-        </clip>
-      </camera>
-    </sensor>
-  </link>
 
     <plugin
       filename="gz-sim-joint-state-publisher-system"
