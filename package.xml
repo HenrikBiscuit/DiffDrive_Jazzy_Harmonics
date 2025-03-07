@@ -23,6 +23,10 @@
   <exec_depend>rviz2</exec_depend>
   <exec_depend>ros_gz_bridge</exec_depend>
   <exec_depend>ros_gz_sim</exec_depend>
+  <depend>rclpy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>cv_bridge</depend>
+  <depend>std_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

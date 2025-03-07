@@ -44,7 +44,7 @@ def generate_launch_description():
     use_respawn = LaunchConfiguration('use_respawn')
     log_level = LaunchConfiguration('log_level')
 
-    lifecycle_nodes = ['map_server', 'amcl']
+    lifecycle_nodes = ['amcl']
 
     # Map fully qualified names to relative ones so the node's namespace can be prepended.
     # In case of the transforms (tf), currently, there doesn't seem to be a better alternative
@@ -134,20 +134,20 @@ def generate_launch_description():
                 arguments=['--ros-args', '--log-level', log_level],
                 remappings=remappings,
             ),
-            Node(
-                condition=IfCondition(
-                    NotEqualsSubstitution(LaunchConfiguration('map'), '')
-                ),
-                package='nav2_map_server',
-                executable='map_server',
-                name='map_server',
-                output='screen',
-                respawn=use_respawn,
-                respawn_delay=2.0,
-                parameters=[configured_params, {'yaml_filename': map_yaml_file}],
-                arguments=['--ros-args', '--log-level', log_level],
-                remappings=remappings,
-            ),
+            # Node(
+            #     condition=IfCondition(
+            #         NotEqualsSubstitution(LaunchConfiguration('map'), '')
+            #     ),
+            #     package='nav2_map_server',
+            #     executable='map_server',
+            #     name='map_server',
+            #     output='screen',
+            #     respawn=use_respawn,
+            #     respawn_delay=2.0,
+            #     parameters=[configured_params, {'yaml_filename': map_yaml_file}],
+            #     arguments=['--ros-args', '--log-level', log_level],
+            #     remappings=remappings,
+            # ),
             Node(
                 package='nav2_amcl',
                 executable='amcl',
@@ -242,7 +242,7 @@ def generate_launch_description():
 
     # Declare the launch options
     ld.add_action(declare_namespace_cmd)
-    #ld.add_action(declare_map_yaml_cmd)
+    ld.add_action(declare_map_yaml_cmd)
     ld.add_action(declare_use_sim_time_cmd)
     ld.add_action(declare_params_file_cmd)
     ld.add_action(declare_autostart_cmd)

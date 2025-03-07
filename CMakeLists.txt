@@ -14,9 +14,11 @@ find_package(ament_cmake REQUIRED)
 
 
 install(
-  DIRECTORY src launch rviz config world
+  DIRECTORY src launch rviz config world 
   DESTINATION share/${PROJECT_NAME}
 )
+
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

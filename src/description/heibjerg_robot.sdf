@@ -283,7 +283,7 @@
             <x>
               <noise type="gaussian">
                 <mean>0.0</mean>
-                <stddev>2e-4</stddev>
+                <stddev>2e-7</stddev>
                 <bias_mean>0.0000075</bias_mean>
                 <bias_stddev>0.0000008</bias_stddev>
               </noise>
@@ -291,7 +291,7 @@
             <y>
               <noise type="gaussian">
                 <mean>0.0</mean>
-                <stddev>2e-4</stddev>
+                <stddev>2e-7</stddev>
                 <bias_mean>0.0000075</bias_mean>
                 <bias_stddev>0.0000008</bias_stddev>
               </noise>
@@ -299,7 +299,7 @@
             <z>
               <noise type="gaussian">
                 <mean>0.0</mean>
-                <stddev>2e-4</stddev>
+                <stddev>2e-7</stddev>
                 <bias_mean>0.0000075</bias_mean>
                 <bias_stddev>0.0000008</bias_stddev>
               </noise>
@@ -309,7 +309,7 @@
             <x>
               <noise type="gaussian">
                 <mean>0.0</mean>
-                <stddev>1.7e-2</stddev>
+                <stddev>1.7e-6</stddev>
                 <bias_mean>0.1</bias_mean>
                 <bias_stddev>0.001</bias_stddev>
               </noise>
@@ -317,7 +317,7 @@
             <y>
               <noise type="gaussian">
                 <mean>0.0</mean>
-                <stddev>1.7e-2</stddev>
+                <stddev>1.7e-6</stddev>
                 <bias_mean>0.1</bias_mean>
                 <bias_stddev>0.001</bias_stddev>
               </noise>
@@ -325,7 +325,7 @@
             <z>
               <noise type="gaussian">
                 <mean>0.0</mean>
-                <stddev>1.7e-2</stddev>
+                <stddev>1.7e-6</stddev>
                 <bias_mean>0.1</bias_mean>
                 <bias_stddev>0.001</bias_stddev>
               </noise>
@@ -358,13 +358,13 @@
               <horizontal>
                 <noise type="gaussian">
                   <mean>0.0</mean>
-                  <stddev>0.000000001</stddev>
+                  <stddev>0.00000000001</stddev>
                 </noise>
               </horizontal>
               <vertical>
                 <noise type="gaussian">
                   <mean>0.0</mean>
-                  <stddev>0.000000001</stddev>
+                  <stddev>0.00000000001</stddev>
                 </noise>
               </vertical>
             </position_sensing>
@@ -394,13 +394,13 @@
       <wheel_radius>${wheel_radius}</wheel_radius>
 
       <!-- limits -->
-      <max_linear_acceleration>1.0</max_linear_acceleration>
-      <max_angular_acceleration>2.0</max_angular_acceleration>
-      <max_linear_velocity>0.5</max_linear_velocity>
+      <max_linear_acceleration>2.0</max_linear_acceleration>
+      <max_angular_acceleration>3.0</max_angular_acceleration>
+      <max_linear_velocity>1.5</max_linear_velocity>
       <max_angular_velocity>1.0</max_angular_velocity>
 
       <!-- input -->
-      <topic>/cmd_vel_smoothed</topic>
+      <topic>/cmd_vel_nav</topic>
 
       <!-- output -->
       <odom_topic>/odom</odom_topic>

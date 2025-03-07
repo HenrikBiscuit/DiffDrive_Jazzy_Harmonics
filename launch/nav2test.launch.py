@@ -25,6 +25,7 @@ def generate_launch_description():
     map_yaml_file = LaunchConfiguration('map')
     os.environ['GZ_SIM_RESOURCE_PATH'] = os.path.join(pkg_share, 'world')
 
+    container_name = 'nav2_container'
 
     robot_state_publisher_node = Node(
         package='robot_state_publisher',
@@ -93,7 +94,7 @@ def generate_launch_description():
         parameters=[rl_params, {'use_sim_time': LaunchConfiguration('use_sim_time')}],
         remappings=[
             ('imu/data', 'imu'),
-            ('gps/fix', '/navsat'),
+            ('gps/fix', '/navsat_degraded'),
             ('gps/filtered', 'gps/filtered'),
             ('odometry/gps', 'odometry/gps'),
             ('odometry/filtered', 'odometry/global')
@@ -102,7 +103,7 @@ def generate_launch_description():
 
 
     delayed_navigation = TimerAction(
-        period=13.0,  
+        period=15.0,  
         actions=[
             IncludeLaunchDescription(PythonLaunchDescriptionSource(
                     [PathJoinSubstitution([pkg_share,
@@ -119,16 +120,20 @@ def generate_launch_description():
     )
 
     delayed_rviz = TimerAction(
-        period=17.0,  
-        actions=[
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(
-                    [PathJoinSubstitution([FindPackageShare('nav2_bringup'),
-                                       'launch',
-                                       'rviz_launch.py'])]),
-            )
-        ]
-    )
+    period=12.0,  
+    actions=[
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                [PathJoinSubstitution([FindPackageShare('heibjerg'),
+                                   'launch',
+                                   'rviz_launch.py'])]),
+            launch_arguments={
+                'use_sim_time': LaunchConfiguration('use_sim_time'),
+                'rviz_config': PathJoinSubstitution([FindPackageShare('heibjerg'), 'rviz', 'nav2_view.rviz'])
+            }.items()
+        )
+    ]
+)
 
     return LaunchDescription([
         DeclareLaunchArgument(name='model', default_value=default_model_path, description='Absolute path to robot model file'),
